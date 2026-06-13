@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}World Cup Tickets{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">⚽ WorldCup Tickets</a>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}">Matches</a>
+                {% if session.get('user_id') %}
+                    {% if session.get('is_admin') %}
+                        <a href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
+                    {% else %}
+                        <a href="{{ url_for('my_tickets') }}">My Tickets</a>
+                    {% endif %}
+                    <span class="nav-user">Hi, {{ session.get('username') }}</span>
+                    <a href="{{ url_for('logout') }}" class="btn-nav">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-nav">Login</a>
+                    <a href="{{ url_for('register') }}" class="btn-nav btn-nav-primary">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="toast-container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 World Cup Tickets — School Project Demo</p>
+    </footer>
+</body>
+</html>

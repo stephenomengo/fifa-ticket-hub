@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ match.team1 }} vs {{ match.team2 }} - World Cup Tickets{% endblock %}
+
+{% block content %}
+<div class="match-detail-header" style="--bg-image: url('{{ stadium_image(match.stadium) }}');">
+    <div class="match-detail-header-content">
+        <h1>
+            <img class="team-flag" src="https://flagcdn.com/w160/{{ flag_code(match.team1) }}.png" alt="{{ match.team1 }} flag">
+            {{ match.team1 }} <span style="color: var(--gold); font-weight: 600; font-size: 1.2rem;">vs</span> {{ match.team2 }}
+            <img class="team-flag" src="https://flagcdn.com/w160/{{ flag_code(match.team2) }}.png" alt="{{ match.team2 }} flag">
+        </h1>
+        <div class="match-detail-meta">
+            <span>📍 {{ match.stadium }}</span>
+            <span>🗓️ {{ match.match_date }}</span>
+            <span>💵 ${{ "%.2f"|format(match.price) }} / seat</span>
+        </div>
+    </div>
+</div>
+
+<div class="seat-map-card">
+    <div class="screen-label">⚽ FIELD / PITCH ⚽</div>
+
+    {% if session.get('user_id') %}
+    <form method="POST" action="{{ url_for('book_seats', match_id=match.id) }}" id="bookingForm">
+        <div class="seat-grid">
+            {% for row in 'ABCDEF' %}
+            <div class="seat-row">
+                <div class="row-label">{{ row }}</div>
+                {% for num in range(1, 11) %}
+                    {% set seat_id = row ~ num %}
+                    {% if seat_id in booked_seats %}
+                        <div class="seat seat-booked" title="Already booked">{{ seat_id }}</div>
+                    {% else %}
+                        <label class="seat" for="seat_{{ seat_id }}">
+                            <input type="checkbox" name="seats" id="seat_{{ seat_id }}" value="{{ seat_id }}" onchange="updateSummary(this)">
+                            {{ seat_id }}
+                        </label>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="seat-legend">
+            <div class="legend-item"><div class="legend-box legend-available"></div> Available</div>
+            <div class="legend-item"><div class="legend-box legend-selected"></div> Selected</div>
+            <div class="legend-item"><div class="legend-box legend-booked"></div> Booked</div>
+        </div>
+
+        <div class="booking-summary">
+            <p>Selected seats: <span id="selectedCount">0</span> &nbsp;|&nbsp; Total: $<span id="totalPrice">0.00</span></p>
+            <button type="submit" class="btn btn-gold" style="padding: 12px 36px;" id="bookBtn" disabled>Proceed to Payment</button>
+        </div>
+    </form>
+    {% else %}
+    <div class="empty-state">
+        <h3>Please log in to select seats</h3>
+        <p style="margin-bottom: 16px;">You need an account to book tickets.</p>
+        <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: auto; padding: 10px 28px;">Log In</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    const price = {{ match.price }};
+
+    function updateSummary() {
+        const checked = document.querySelectorAll('input[name="seats"]:checked');
+        document.getElementById('selectedCount').textContent = checked.length;
+        document.getElementById('totalPrice').textContent = (checked.length * price).toFixed(2);
+
+        const bookBtn = document.getElementById('bookBtn');
+        if (bookBtn) {
+            bookBtn.disabled = checked.length === 0;
+        }
+
+        document.querySelectorAll('.seat').forEach(label => {
+            const input = label.querySelector('input[type="checkbox"]');
+            if (input && input.checked) {
+                label.classList.add('seat-selected');
+            } else if (label.classList.contains('seat-selected')) {
+                label.classList.remove('seat-selected');
+            }
+        });
+    }
+</script>
+{% endblock %}

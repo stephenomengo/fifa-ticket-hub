@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Booking Confirmed - World Cup Tickets{% endblock %}
+
+{% block content %}
+<div class="ticket-card">
+    <div class="ticket-header">
+        <div class="ticket-success-icon">
+            <svg viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="24"/>
+                <path d="M14 27l8 8 16-16"/>
+            </svg>
+        </div>
+        <h2>Booking Confirmed!</h2>
+        <p>Thank you for your purchase</p>
+    </div>
+    <div class="ticket-body">
+        <div class="ticket-row">
+            <span>Match</span>
+            <span>{{ booking.team1 }} vs {{ booking.team2 }}</span>
+        </div>
+        <div class="ticket-row">
+            <span>Stadium</span>
+            <span>{{ booking.stadium }}</span>
+        </div>
+        <div class="ticket-row">
+            <span>Date</span>
+            <span>{{ booking.match_date }}</span>
+        </div>
+        <div class="ticket-row">
+            <span>Seats</span>
+            <span>{{ booking.seat_numbers }}</span>
+        </div>
+        <div class="ticket-row">
+            <span>Number of Tickets</span>
+            <span>{{ booking.num_seats }}</span>
+        </div>
+        <div class="ticket-row">
+            <span>Booking Reference</span>
+            <span>#{{ booking.id }}</span>
+        </div>
+        <div class="ticket-row">
+            <span>Total Paid</span>
+            <span>${{ "%.2f"|format(booking.total_price) }}</span>
+        </div>
+    </div>
+    <div class="ticket-footer">
+        <a href="{{ url_for('my_tickets') }}" class="btn btn-primary" style="width: auto; padding: 10px 28px; margin-right: 10px;">View My Tickets</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary" style="width: auto; padding: 10px 28px;">Back to Matches</a>
+    </div>
+</div>
+{% endblock %}
