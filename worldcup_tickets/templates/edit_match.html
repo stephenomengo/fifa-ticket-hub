@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Edit Match - World Cup Tickets{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 600px;">
+    <h2>Edit Match</h2>
+    <form method="POST">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="team1">Team 1</label>
+                <input type="text" id="team1" name="team1" value="{{ match.team1 }}" required>
+            </div>
+            <div class="form-group">
+                <label for="team2">Team 2</label>
+                <input type="text" id="team2" name="team2" value="{{ match.team2 }}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="stadium">Stadium</label>
+            <input type="text" id="stadium" name="stadium" value="{{ match.stadium }}" required>
+        </div>
+        <div class="form-group">
+            <label for="match_date">Date &amp; Time (e.g. 2026-07-05 18:00)</label>
+            <input type="text" id="match_date" name="match_date" value="{{ match.match_date }}" placeholder="YYYY-MM-DD HH:MM" required>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="price">Price per Seat ($)</label>
+                <input type="number" id="price" name="price" step="0.01" min="0" value="{{ match.price }}" required>
+            </div>
+            <div class="form-group">
+                <label for="total_seats">Total Seats</label>
+                <input type="number" id="total_seats" name="total_seats" min="1" value="{{ match.total_seats }}" required>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+    <div class="form-footer">
+        <a href="{{ url_for('admin_dashboard') }}">&larr; Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Matches - World Cup Tickets{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <span class="hero-badge">FIFA World Cup 2026</span>
+        <h1>Get Your Seat at the World's Biggest Stage</h1>
+        <p>Browse official fixtures, pick your seats on an interactive seat map, and secure your tickets in minutes.</p>
+    </div>
+</div>
+
+<div class="page-header">
+    <h1>Upcoming Matches</h1>
+    <p>Select a match to view details and book your seats</p>
+</div>
+
+{% if matches %}
+<div class="match-grid">
+    {% for match in matches %}
+    <div class="match-card">
+        <div class="match-card-image">
+            <img src="{{ stadium_image(match.stadium) }}" alt="{{ match.stadium }}" loading="lazy">
+            <span class="stadium-name">📍 {{ match.stadium }}</span>
+        </div>
+        <div class="match-card-header">
+            <img class="team-flag" src="https://flagcdn.com/w80/{{ flag_code(match.team1) }}.png" alt="{{ match.team1 }} flag">
+            <div class="match-teams">
+                {{ match.team1 }}
+                <span class="vs-label">VS</span>
+                {{ match.team2 }}
+            </div>
+            <img class="team-flag" src="https://flagcdn.com/w80/{{ flag_code(match.team2) }}.png" alt="{{ match.team2 }} flag">
+        </div>
+        <div class="match-card-body">
+            <div class="match-info">
+                <span>🗓️ Date</span>
+                <span>{{ match.match_date }}</span>
+            </div>
+            <div class="match-info">
+                <span>💺 Total Seats</span>
+                <span>{{ match.total_seats }}</span>
+            </div>
+            <div class="match-price">${{ "%.2f"|format(match.price) }} / seat</div>
+        </div>
+        <div class="match-card-footer">
+            <a href="{{ url_for('match_detail', match_id=match.id) }}" class="btn btn-primary">View &amp; Book</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>No matches available</h3>
+    <p>Please check back later.</p>
+</div>
+{% endif %}
+{% endblock %}

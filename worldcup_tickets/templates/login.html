@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Login - World Cup Tickets{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Welcome Back</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Log In</button>
+    </form>
+    <div class="form-footer">
+        Don't have an account? <a href="{{ url_for('register') }}">Sign up</a>
+        <br><br>
+        <small>Admin login: <strong>admin</strong> / <strong>admin123</strong></small>
+    </div>
+</div>
+{% endblock %}
