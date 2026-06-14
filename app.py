@@ -171,6 +171,18 @@ def index():
     return render_template("index.html", matches=matches)
 
 
+# Stadium layout configuration for the seat map
+STADIUM_SECTIONS = {
+    "N": "North Stand",
+    "E": "East Stand",
+    "S": "South Stand",
+    "W": "West Stand",
+}
+SECTION_ROWS = ["A", "B", "C"]
+SEATS_PER_ROW = 10
+SEATS_PER_SECTION = len(SECTION_ROWS) * SEATS_PER_ROW  # 30
+
+
 @app.route("/match/<int:match_id>")
 def match_detail(match_id):
     db = get_db()
@@ -187,7 +199,25 @@ def match_detail(match_id):
     for b in bookings:
         booked_seats.update(b["seat_numbers"].split(","))
 
-    return render_template("match_detail.html", match=match, booked_seats=booked_seats)
+    # Compute availability per stand for the stadium overview
+    section_info = {}
+    for code, name in STADIUM_SECTIONS.items():
+        booked_count = sum(1 for s in booked_seats if s.startswith(code + "-"))
+        section_info[code] = {
+            "name": name,
+            "booked": booked_count,
+            "available": SEATS_PER_SECTION - booked_count,
+            "total": SEATS_PER_SECTION,
+        }
+
+    return render_template(
+        "match_detail.html",
+        match=match,
+        booked_seats=booked_seats,
+        section_info=section_info,
+        section_rows=SECTION_ROWS,
+        seats_per_row=SEATS_PER_ROW,
+    )
 
 
 @app.route("/book/<int:match_id>", methods=["POST"])

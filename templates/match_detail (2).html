@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}{{ match.team1 }} vs {{ match.team2 }} - World Cup Tickets{% endblock %}
+
+{% block content %}
+<div class="match-detail-header" style="--bg-image: url('{{ stadium_image(match.stadium) }}');">
+    <div class="match-detail-header-content">
+        <h1>
+            <img class="team-flag" src="https://flagcdn.com/w160/{{ flag_code(match.team1) }}.png" alt="{{ match.team1 }} flag">
+            {{ match.team1 }} <span style="color: var(--gold); font-weight: 600; font-size: 1.2rem;">vs</span> {{ match.team2 }}
+            <img class="team-flag" src="https://flagcdn.com/w160/{{ flag_code(match.team2) }}.png" alt="{{ match.team2 }} flag">
+        </h1>
+        <div class="match-detail-meta">
+            <span>📍 {{ match.stadium }}</span>
+            <span>🗓️ {{ match.match_date }}</span>
+            <span>💵 ${{ "%.2f"|format(match.price) }} / seat</span>
+        </div>
+    </div>
+</div>
+
+<div class="seat-map-card">
+
+    {% if session.get('user_id') %}
+    <form method="POST" action="{{ url_for('book_seats', match_id=match.id) }}" id="bookingForm">
+
+        <!-- Stadium overview -->
+        <div class="stadium-container" id="stadiumView">
+            <p class="stadium-hint">Click a stand to view and select seats in that section</p>
+            <svg class="stadium-svg" viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg">
+                <rect class="stadium-bowl" x="30" y="20" width="540" height="460" rx="70"></rect>
+
+                <!-- North stand -->
+                <g class="stand-section" onclick="zoomToSection('N')">
+                    <rect x="170" y="55" width="260" height="85" rx="10"></rect>
+                    <text class="stand-label" x="300" y="90">North Stand</text>
+                    <text class="stand-sublabel" x="300" y="112">{{ section_info.N.available }} / {{ section_info.N.total }} available</text>
+                </g>
+
+                <!-- South stand -->
+                <g class="stand-section" onclick="zoomToSection('S')">
+                    <rect x="170" y="360" width="260" height="85" rx="10"></rect>
+                    <text class="stand-label" x="300" y="395">South Stand</text>
+                    <text class="stand-sublabel" x="300" y="417">{{ section_info.S.available }} / {{ section_info.S.total }} available</text>
+                </g>
+
+                <!-- East stand -->
+                <g class="stand-section" onclick="zoomToSection('E')">
+                    <rect x="445" y="160" width="90" height="180" rx="10"></rect>
+                    <text class="stand-label" x="490" y="240" transform="rotate(90 490 240)">East Stand</text>
+                    <text class="stand-sublabel" x="490" y="262" transform="rotate(90 490 262)">{{ section_info.E.available }} / {{ section_info.E.total }} avail.</text>
+                </g>
+
+                <!-- West stand -->
+                <g class="stand-section" onclick="zoomToSection('W')">
+                    <rect x="65" y="160" width="90" height="180" rx="10"></rect>
+                    <text class="stand-label" x="110" y="240" transform="rotate(-90 110 240)">West Stand</text>
+                    <text class="stand-sublabel" x="110" y="262" transform="rotate(-90 110 262)">{{ section_info.W.available }} / {{ section_info.W.total }} avail.</text>
+                </g>
+
+                <!-- Pitch -->
+                <rect class="pitch-rect" x="170" y="160" width="260" height="180" rx="6"></rect>
+                <line class="pitch-line" x1="300" y1="160" x2="300" y2="340"></line>
+                <circle class="pitch-line" cx="300" cy="250" r="32"></circle>
+                <circle class="pitch-line" cx="300" cy="250" r="2" fill="#fff"></circle>
+                <rect class="pitch-line" x="170" y="210" width="22" height="80"></rect>
+                <rect class="pitch-line" x="408" y="210" width="22" height="80"></rect>
+            </svg>
+        </div>
+
+        <!-- Section seat views -->
+        {% for code, name in {'N': 'North Stand', 'E': 'East Stand', 'S': 'South Stand', 'W': 'West Stand'}.items() %}
+        <div class="section-seats" id="section-{{ code }}">
+            <div class="section-header">
+                <h3>🏟️ {{ name }}</h3>
+                <button type="button" class="btn btn-secondary btn-back" onclick="showStadium()">← Back to Stadium View</button>
+            </div>
+            <div class="screen-label">⚽ PITCH SIDE ⚽</div>
+            <div class="seat-grid">
+                {% for row in section_rows %}
+                <div class="seat-row">
+                    <div class="row-label">{{ row }}</div>
+                    {% for num in range(1, seats_per_row + 1) %}
+                        {% set seat_id = code ~ '-' ~ row ~ num %}
+                        {% if seat_id in booked_seats %}
+                            <div class="seat seat-booked" title="Already booked">{{ row }}{{ num }}</div>
+                        {% else %}
+                            <label class="seat" for="seat_{{ seat_id }}">
+                                <input type="checkbox" name="seats" id="seat_{{ seat_id }}" value="{{ seat_id }}" onchange="updateSummary()">
+                                {{ row }}{{ num }}
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="seat-legend">
+            <div class="legend-item"><div class="legend-box legend-available"></div> Available</div>
+            <div class="legend-item"><div class="legend-box legend-selected"></div> Selected</div>
+            <div class="legend-item"><div class="legend-box legend-booked"></div> Booked</div>
+        </div>
+
+        <div class="booking-summary">
+            <p>Selected seats: <span id="selectedCount">0</span> &nbsp;|&nbsp; Total: $<span id="totalPrice">0.00</span></p>
+            <p id="selectedSeatsList" style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 14px;"></p>
+            <button type="submit" class="btn btn-gold" style="padding: 12px 36px;" id="bookBtn" disabled>Proceed to Payment</button>
+        </div>
+    </form>
+    {% else %}
+    <div class="empty-state">
+        <h3>Please log in to select seats</h3>
+        <p style="margin-bottom: 16px;">You need an account to book tickets.</p>
+        <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: auto; padding: 10px 28px;">Log In</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    const price = {{ match.price }};
+
+    function zoomToSection(code) {
+        const stadiumView = document.getElementById('stadiumView');
+        stadiumView.classList.add('stadium-zooming');
+        setTimeout(() => {
+            stadiumView.style.display = 'none';
+            stadiumView.classList.remove('stadium-zooming');
+            document.querySelectorAll('.section-seats').forEach(el => el.classList.remove('active'));
+            document.getElementById('section-' + code).classList.add('active');
+        }, 260);
+    }
+
+    function showStadium() {
+        document.querySelectorAll('.section-seats').forEach(el => el.classList.remove('active'));
+        const stadiumView = document.getElementById('stadiumView');
+        stadiumView.style.display = 'block';
+    }
+
+    function updateSummary() {
+        const checked = document.querySelectorAll('input[name="seats"]:checked');
+        document.getElementById('selectedCount').textContent = checked.length;
+        document.getElementById('totalPrice').textContent = (checked.length * price).toFixed(2);
+
+        const labels = Array.from(checked).map(c => c.value).join(', ');
+        document.getElementById('selectedSeatsList').textContent = labels ? ('Seats: ' + labels) : '';
+
+        const bookBtn = document.getElementById('bookBtn');
+        if (bookBtn) {
+            bookBtn.disabled = checked.length === 0;
+        }
+
+        document.querySelectorAll('.seat').forEach(label => {
+            const input = label.querySelector('input[type="checkbox"]');
+            if (input && input.checked) {
+                label.classList.add('seat-selected');
+            } else if (label.classList.contains('seat-selected')) {
+                label.classList.remove('seat-selected');
+            }
+        });
+    }
+</script>
+{% endblock %}

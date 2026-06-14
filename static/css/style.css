@@ -648,6 +648,125 @@ h1, h2, h3, .logo, .match-teams, .ticket-header h2 {
     color: #e5ece8;
 }
 
+/* Stadium overview map */
+.stadium-container {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.stadium-hint {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+}
+
+.stadium-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-width: 620px;
+    margin: 0 auto;
+}
+
+.stadium-bowl {
+    fill: var(--light-bg);
+    stroke: var(--border);
+    stroke-width: 1;
+}
+
+.stand-section {
+    cursor: pointer;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.22s ease, filter 0.22s ease;
+}
+
+.stand-section:hover {
+    transform: scale(1.035);
+    filter: brightness(1.12);
+}
+
+.stand-section rect {
+    fill: var(--primary);
+    stroke: var(--primary-dark);
+    stroke-width: 2;
+    transition: fill 0.2s;
+}
+
+.stand-section:hover rect {
+    fill: var(--primary-light);
+}
+
+.stand-label {
+    fill: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.stand-sublabel {
+    fill: var(--gold);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.pitch-rect {
+    fill: #2e8b3d;
+    stroke: #fff;
+    stroke-width: 2;
+}
+
+.pitch-line {
+    stroke: #fff;
+    stroke-width: 2;
+    fill: none;
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.stadium-zooming {
+    animation: stadiumZoomOut 0.26s ease forwards;
+}
+
+@keyframes stadiumZoomOut {
+    to { opacity: 0; transform: scale(1.18); }
+}
+
+/* Section seat view */
+.section-seats {
+    display: none;
+}
+
+.section-seats.active {
+    display: block;
+    animation: fadeInUp 0.4s ease;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.section-header h3 {
+    color: var(--primary-dark);
+    font-weight: 700;
+}
+
+.btn-back {
+    background: var(--light-bg);
+    border: 1px solid var(--border);
+}
+
 /* Seat map */
 .seat-map-card {
     background: var(--card-bg);
